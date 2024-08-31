@@ -65,20 +65,20 @@ class AuthController extends Controller
     public function redirectAfterLogout(Request $request, $userType)
     {
         $this->logout($request);
-        if ($userType === 'admin') {
+        if ($userType === Roles::ADMIN->value) {
             return redirect()->route('auth.admin.login');
-        } elseif ($userType === 'user') {
+        } elseif ($userType === Roles::USER->value) {
             return redirect()->route('auth.user.login');
         }
     }
 
     public function adminLogout(Request $request)
     {
-        return $this->redirectAfterLogout($request, 'admin');
+        return $this->redirectAfterLogout($request, Roles::ADMIN->value);
     }
 
     public function userLogout(Request $request)
     {
-        return $this->redirectAfterLogout($request, 'user');
+        return $this->redirectAfterLogout($request, Roles::USER->value);
     }
 }
