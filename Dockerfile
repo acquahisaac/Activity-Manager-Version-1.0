@@ -1,12 +1,15 @@
 # Use the official PHP image with Apache
 FROM php:8.1-apache
 
-# Install necessary system dependencies
+# Install necessary system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
     libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql zip
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    && docker-php-ext-install pdo pdo_mysql zip gd mbstring
 
 # Enable Apache mod_rewrite for Laravel
 RUN a2enmod rewrite
@@ -24,7 +27,16 @@ RUN composer install --no-dev --optimize-autoloader
 # Set proper permissions for Laravel directories
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Expose port 80 for the Apache server
+# Ensure the storage and bootstrap/cache directories are writable
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Copy the existing environment file, if needed
+# COPY .env.example .env
+
+# Generate application key (this should be set securely during deployment)
+RUN php artisan key:generate
+
+# Expose port 80 for Apache
 EXPOSE 80
 
 # Start the Apache server in the foreground
